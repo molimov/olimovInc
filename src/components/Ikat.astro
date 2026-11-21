@@ -1,0 +1,149 @@
+---
+/* The signature: an ikat band.
+   Japanese kasuri and Uzbek abrbandi are the same resist-dye technique —
+   warp threads are tied in bundles and dyed before weaving, so each bundle
+   lands slightly off from its neighbours and every edge feathers.
+
+   hero: the motifs alternate between the two flags, woven from threads —
+         Japan (white field, red disc) and Uzbekistan (blue / white / green
+         with thin red lines, a crescent and twelve stars in the blue band).
+   thin: the same two flags at hem size (no crescent or stars), in the footer.
+
+   Everything is computed at build time and is deterministic. */
+interface Props {
+  variant?: 'hero' | 'thin';
+  seed?: number;
+  class?: string;
+}
+const { variant = 'hero', seed = 11, class: cls = '' } = Astro.props;
+
+const hero = variant === 'hero';
+const W = 1200;
+const H = hero ? 140 : 36;
+const T = hero ? 3 : 3; // thread width
+const bundle = hero ? 6 : 4;
+const pitch = hero ? 150 : 60;
+const halfW = hero ? 70 : 27;
+const halfH = hero ? 58 : 15;
+const shift = hero ? 8 : 2;
+const mid = H / 2;
+
+let s = seed;
+const rnd = () => {
+  s = (s * 9301 + 49297) % 233280;
+  return s / 233280;
+};
+
+type R = { x: number; y: number; h: number; c: string };
+const rects: R[] = [];
+const push = (x: number, y0: number, y1: number, c: string) => {
+  if (y1 - y0 > 0.2) rects.push({ x, y: y0, h: y1 - y0, c });
+};
+// add a segment clipped to [lo, hi]
+const pushClip = (x: number, y0: number, y1: number, lo: number, hi: number, c: string) =>
+  push(x, Math.max(y0, lo), Math.min(y1, hi), c);
+
+const RIM = hero ? 4 : 1.6;
+// Uzbek flag: blue, red line, white, red line, green (fractions of the motif height)
+const UZ = [
+  [0, 0.31, 'uzblue'],
+  [0.31, 0.345, 'uzred'],
+  [0.345, 0.655, 'white'],
+  [0.655, 0.69, 'uzred'],
+  [0.69, 1, 'uzgreen'],
+] as const;
+// twelve stars in rows of 3 / 4 / 5, right-aligned as on the flag
+const STAR_ROWS = [
+  { f: 0.24, from: 2 },
+  { f: 0.5, from: 1 },
+  { f: 0.76, from: 0 },
+];
+
+let bTop = 0;
+let bBot = 0;
+const n = Math.floor(W / T);
+
+for (let i = 0; i < n; i++) {
+  if (i % bundle === 0) {
+    bTop = (rnd() - 0.5) * 2 * shift;
+    bBot = (rnd() - 0.5) * 2 * shift;
+  }
+  const x = i * T;
+  const xc = x + T / 2;
+  const cx = Math.round((x - pitch / 2) / pitch) * pitch + pitch / 2;
+  const k = Math.round((cx - pitch / 2) / pitch);
+  const d = Math.abs(xc - cx);
+  const hh = halfH * (1 - d / halfW);
+  const jit = () => (rnd() - 0.5) * (hero ? 1 : 0.6);
+  const japan = k % 2 === 0;
+
+  if (hh <= 1.5) {
+    if (hero) push(x, mid - 1 + bTop * 0.3, mid + 1 + bTop * 0.3, 'stone');
+    continue;
+  }
+  const top = mid - hh + bTop + jit();
+  const bot = mid + hh + bBot + jit();
+
+  if (japan) {
+    push(x, top, bot, 'ai');
+    if (hh <= (hero ? 6 : 2.5)) continue;
+    push(x, top + RIM, bot - RIM, 'white');
+    const r = hero ? 21 : 5.5;
+    if (d < r) {
+      const h = Math.sqrt(r * r - d * d);
+      push(x, mid - h + bTop * 0.4, mid + h + bBot * 0.4, 'jpred');
+    }
+    continue;
+  }
+
+  // Uzbekistan
+  push(x, top, bot, 'seiyu');
+  if (hh <= (hero ? 6 : 2.5)) continue;
+  const t = top + RIM;
+  const b = bot - RIM;
+  const L = b - t;
+  for (const [f0, f1, c] of UZ) push(x, t + f0 * L, t + f1 * L + (f1 < 1 ? 0.6 : 0), c);
+  if (!hero) continue; // the hem is too small for the crescent and stars
+  const blueLo = t;
+  const blueHi = t + 0.31 * L;
+
+  // crescent: outer disc minus a disc shifted towards the stars
+  const ccx = cx - 14;
+  const ccy = mid - 29 + bTop * 0.6;
+  const R0 = 8.5;
+  const R1 = 7;
+  const dx0 = xc - ccx;
+  if (Math.abs(dx0) < R0) {
+    const ho = Math.sqrt(R0 * R0 - dx0 * dx0);
+    const dx1 = xc - (ccx + 3.4);
+    if (Math.abs(dx1) < R1) {
+      const hi = Math.sqrt(R1 * R1 - dx1 * dx1);
+      pushClip(x, ccy - ho, ccy - 0.6 - hi, blueLo, blueHi, 'white');
+      pushClip(x, ccy - 0.6 + hi, ccy + ho, blueLo, blueHi, 'white');
+    } else {
+      pushClip(x, ccy - ho, ccy + ho, blueLo, blueHi, 'white');
+    }
+  }
+
+  // stars: one thread wide, on every second thread
+  const col = Math.round((x - (cx - 3)) / 6);
+  if ((x - (cx - 3)) % 6 === 0 && col >= 0 && col <= 4) {
+    for (const row of STAR_ROWS) {
+      if (col < row.from) continue;
+      const y = blueLo + row.f * (blueHi - blueLo);
+      pushClip(x, y - 1.3, y + 1.3, blueLo, blueHi, 'white');
+    }
+  }
+}
+---
+<svg
+  class:list={['ikat', `ikat--${variant}`, cls]}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio={hero ? 'xMidYMid slice' : 'none'}
+  aria-hidden="true"
+  focusable="false"
+>
+  {rects.map((r) => (
+    <rect x={r.x.toFixed(1)} y={r.y.toFixed(2)} width={(T - 0.7).toFixed(1)} height={r.h.toFixed(2)} class={`i-${r.c}`} />
+  ))}
+</svg>

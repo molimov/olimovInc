@@ -1,0 +1,93 @@
+---
+import '../styles/global.css';
+import { t, href, asset, LANGS, LANG_SHORT, LANG_NAMES, type Lang } from '../i18n/content';
+import Ikat from '../components/Ikat.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+const site = Astro.site ?? new URL('https://olimov.example');
+const navKeys = ['directions', 'services', 'process', 'work', 'founder', 'company'] as const;
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{d.meta.title}</title>
+  <meta name="description" content={d.meta.description} />
+  <meta name="theme-color" content="#EEF0EC" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+  <link rel="canonical" href={new URL(href(lang), site).href} />
+  {LANGS.map((l) => <link rel="alternate" hreflang={l} href={new URL(href(l), site).href} />)}
+  <link rel="alternate" hreflang="x-default" href={new URL(href('ja'), site).href} />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={d.meta.title} />
+  <meta property="og:description" content={d.meta.description} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Mrs+Saint+Delafield&display=swap"
+  />
+</head>
+<body>
+  <a class="skip" href="#main">{d.skip}</a>
+
+  <header class="bar">
+    <div class="wrap bar__in">
+      <a class="logo" href={href(lang)} aria-label={d.companyName}>
+        <span class="logo__script" aria-hidden="true">Olimov</span>
+      </a>
+
+      <nav class="nav" aria-label={d.menu}>
+        {navKeys.map((k) => <a href={`#${k}`}>{d.nav[k]}</a>)}
+      </nav>
+
+      <div class="bar__end">
+        <ul class="langs" aria-label="Language">
+          {LANGS.map((l) => (
+            <li>
+              <a href={href(l)} lang={l} hreflang={l} title={LANG_NAMES[l]} aria-current={l === lang ? 'page' : undefined}>
+                {LANG_SHORT[l]}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a class="btn btn--small" href="#contact">{d.navCta}</a>
+        <details class="menu">
+          <summary>{d.menu}</summary>
+          <nav aria-label={d.menu}>
+            {navKeys.map((k) => <a href={`#${k}`}>{d.nav[k]}</a>)}
+          </nav>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <main id="main"><slot /></main>
+
+  <footer class="foot">
+    <Ikat variant="thin" seed={29} class="foot__ikat" />
+    <div class="wrap foot__in">
+      <div>
+        <span class="logo__script foot__logo" aria-hidden="true">Olimov</span>
+        <p class="foot__tag">{d.footer.tagline}</p>
+      </div>
+      <div class="foot__end">
+        <a href="#main">{d.footer.top}</a>
+        <small>{d.footer.rights}</small>
+      </div>
+    </div>
+  </footer>
+
+  <script is:inline>
+    // Close the mobile menu after choosing a section.
+    document.querySelectorAll('.menu a').forEach(function (a) {
+      a.addEventListener('click', function () { a.closest('details').removeAttribute('open'); });
+    });
+  </script>
+</body>
+</html>

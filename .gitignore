@@ -1,0 +1,10 @@
+# build output and dependencies
+node_modules/
+dist/
+.astro/
+
+# local tooling (contains machine-specific paths)
+.claude/
+
+# OS
+.DS_Store

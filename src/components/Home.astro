@@ -1,0 +1,205 @@
+---
+import { t, asset, company, type Lang } from '../i18n/content';
+import Ikat from './Ikat.astro';
+import { paint } from '../i18n/paint';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+const mail = `mailto:${company.email}`;
+const p = (x: string) => paint(x, lang);
+// directions: the first block is about selling in Uzbekistan, the second about Japan
+const dirTone = ['uz', 'jp'];
+---
+<!-- Hero -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap">
+    <p class="eyebrow" set:html={p(d.hero.eyebrow)} />
+    <h1 id="hero-title" class="hero__title">
+      <span set:html={p(d.hero.title[0])} />
+      <span set:html={p(d.hero.title[1])} />
+    </h1>
+    <p class="hero__lead">{d.hero.lead}</p>
+    <div class="hero__cta">
+      <a class="btn" href={mail}>{d.hero.cta}</a>
+      <span class="note">{d.hero.ctaNote}</span>
+    </div>
+  </div>
+
+  <div class="loom">
+    <div class="wrap loom__ends">
+      {d.hero.ends.map((e) => (
+        <p class="loom__end">
+          <span class="loom__city" set:html={p(e.city)} />
+          <span class="mono">{e.coord}</span>
+        </p>
+      ))}
+    </div>
+    <Ikat variant="hero" seed={11} class="loom__band" />
+  </div>
+</section>
+
+<!-- Directions -->
+<section id="directions" class="sec" aria-labelledby="directions-title">
+  <div class="wrap">
+    <p class="eyebrow">{d.directions.label}</p>
+    <h2 id="directions-title" set:html={p(d.directions.title)} />
+    <div class="dirs">
+      {d.directions.items.map((it, i) => (
+        <article class={`dir dir--${dirTone[i]}`}>
+          <p class="mono dir__route" set:html={p(it.route)} />
+          <p class="dir__for" set:html={p(it.for)} />
+          <h3>{it.head}</h3>
+          <ul class="ticks">
+            {it.points.map((p) => <li>{p}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+    <p class="note" set:html={p(d.directions.note)} />
+  </div>
+</section>
+
+<!-- Services -->
+<section id="services" class="sec sec--tint" aria-labelledby="services-title">
+  <div class="wrap">
+    <p class="eyebrow">{d.services.label}</p>
+    <h2 id="services-title">{d.services.title}</h2>
+    <div class="svcs">
+      {d.services.items.map((s) => (
+        <article class="svc">
+          <h3>{s.name}</h3>
+          <p>{s.desc}</p>
+          <ul class="terms" aria-label="">
+            {s.terms.map((x) => <li class="mono">{x}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Process: a real sequence, so it is numbered -->
+<section id="process" class="sec" aria-labelledby="process-title">
+  <div class="wrap">
+    <p class="eyebrow">{d.process.label}</p>
+    <h2 id="process-title">{d.process.title}</h2>
+    <ol class="steps">
+      {d.process.steps.map((s) => (
+        <li class="step">
+          <h3>{s.name}</h3>
+          <p>{s.desc}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<!-- Work -->
+<section id="work" class="sec sec--tint" aria-labelledby="work-title">
+  <div class="wrap">
+    <p class="eyebrow">{d.work.label}</p>
+    <h2 id="work-title">{d.work.title}</h2>
+    <p class="note">{d.work.lead}</p>
+    <ul class="works">
+      {d.work.items.map((w) => (
+        <li class="work">
+          <div class="work__meta">
+            <span class="mono">{w.kind}</span>
+            <span class:list={['status', { 'status--live': !w.done }]}>{w.status}</span>
+          </div>
+          <div>
+            <h3 set:html={p(w.title)} />
+            <p>{w.desc}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<!-- Founder -->
+<section id="founder" class="sec" aria-labelledby="founder-title">
+  <div class="wrap founder">
+    <figure class="founder__photo">
+      <img src={asset('founder.webp')} alt={d.founder.photoAlt} width="828" height="815" loading="lazy" decoding="async" />
+    </figure>
+    <div class="founder__body">
+      <p class="eyebrow">{d.founder.label}</p>
+      <h2 id="founder-title">{d.founder.title}</h2>
+      {d.founder.message.map((p) => <p class="founder__msg">{p}</p>)}
+      <p class="founder__name">
+        <span class="founder__role">{d.founder.role}</span>
+        <span class="founder__n">{d.founder.name}</span>
+        {d.founder.nameAlt && <span class="mono">{d.founder.nameAlt}</span>}
+      </p>
+
+      <h3 class="sub">{d.founder.bioLabel}</h3>
+      <dl class="bio">
+        {d.founder.bio.map((b) => (
+          <div><dt class="mono">{b.year}</dt><dd>{b.text}</dd></div>
+        ))}
+      </dl>
+
+      <h3 class="sub">{d.founder.langsLabel}</h3>
+      <ul class="terms terms--langs">
+        {d.founder.langs.map((l) => <li>{l}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Company -->
+<section id="company" class="sec sec--tint" aria-labelledby="company-title">
+  <div class="wrap narrow">
+    <p class="eyebrow">{d.company.label}</p>
+    <h2 id="company-title">{d.company.title}</h2>
+    <dl class="table">
+      {d.company.rows.map((r) => (
+        <div>
+          <dt>{r.k}</dt>
+          <dd>{'mail' in r && r.mail ? <a href={mail}>{r.v}</a> : r.v}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" class="contact" aria-labelledby="contact-title">
+  <div class="wrap contact__in">
+    <div>
+      <p class="eyebrow">{d.contact.label}</p>
+      <h2 id="contact-title">{d.contact.title}</h2>
+      <p class="contact__lead">{d.contact.lead}</p>
+      <a class="contact__mail" href={mail}>{company.email}</a>
+      <p class="note">{d.contact.reply}</p>
+    </div>
+    <div class="clocks" aria-label={d.contact.clocksLabel}>
+      {d.contact.clocks.map((c) => (
+        <p class="clock">
+          <span class="clock__city" set:html={p(c.city)} />
+          <time class="clock__time mono" data-tz={c.tz}>--:--</time>
+          <span class="mono clock__utc">{c.utc}</span>
+        </p>
+      ))}
+      <p class="note">{d.contact.clockNote}</p>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    var els = document.querySelectorAll('[data-tz]');
+    function tick() {
+      var now = new Date();
+      els.forEach(function (el) {
+        try {
+          el.textContent = new Intl.DateTimeFormat('en-GB', { timeZone: el.dataset.tz, hour: '2-digit', minute: '2-digit', hour12: false }).format(now);
+        } catch (e) {}
+      });
+    }
+    tick();
+    setInterval(tick, 30000);
+  })();
+</script>

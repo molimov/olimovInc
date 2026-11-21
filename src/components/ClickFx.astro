@@ -30,10 +30,21 @@
   resize();
   addEventListener('resize', resize);
 
-  addEventListener('pointerdown', function (e) {
-    if (e.button > 0) return; // primary button / touch only
-    fx.push({ x: e.clientX, y: e.clientY, t: performance.now(), k: e.pointerType === 'touch' ? 1.35 : 1 });
+  function play(x, y, k) {
+    fx.push({ x: x, y: y, t: performance.now(), k: k });
     if (!running) { running = true; requestAnimationFrame(frame); }
+  }
+  // Mouse and pen: on press. Touch: when the finger lifts, so the bolt is
+  // not hidden under the fingertip — and larger, so it shows around it.
+  // A touch that turns into a scroll ends in pointercancel, not pointerup,
+  // so scrolling never triggers it.
+  addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'touch' || e.button > 0) return;
+    play(e.clientX, e.clientY, 1);
+  }, { passive: true });
+  addEventListener('pointerup', function (e) {
+    if (e.pointerType !== 'touch') return;
+    play(e.clientX, e.clientY, 1.9);
   }, { passive: true });
 
   function clamp(v) { return Math.max(0, Math.min(1, v)); }

@@ -254,7 +254,9 @@ p, li, dd { text-wrap: pretty; }
 /* founder */
 .founder { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
 .founder__photo { position: sticky; top: 100px; }
-.founder__photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 18%; border-radius: var(--radius); }
+.portrait { display: block; width: 100%; height: auto; }
+.rule-jp { fill: var(--jp); }
+.rule-uz { fill: var(--seiyu); }
 .founder__msg { margin-bottom: 1.1rem; max-width: 36em; }
 .founder__name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 2rem 0 2.75rem; padding-top: 1.25rem; border-top: 1px solid var(--line-strong); }
 .founder__role { font-size: 0.85rem; color: var(--fg-2); }
@@ -298,6 +300,9 @@ p, li, dd { text-wrap: pretty; }
 .foot__tag { font-size: 0.85rem; color: var(--fg-2); }
 .foot__end { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-size: 0.85rem; color: var(--fg-2); }
 .foot__end a { text-underline-offset: 4px; }
+
+/* mouse stalker */
+.cords { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 960px) {

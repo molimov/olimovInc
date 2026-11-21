@@ -1,6 +1,7 @@
 ---
-import { t, asset, company, type Lang } from '../i18n/content';
+import { t, company, type Lang } from '../i18n/content';
 import Ikat from './Ikat.astro';
+import FounderPhoto from './FounderPhoto.astro';
 import { paint } from '../i18n/paint';
 
 interface Props { lang: Lang }
@@ -122,7 +123,7 @@ const dirTone = ['uz', 'jp'];
 <section id="founder" class="sec" aria-labelledby="founder-title">
   <div class="wrap founder">
     <figure class="founder__photo">
-      <img src={asset('founder.webp')} alt={d.founder.photoAlt} width="828" height="815" loading="lazy" decoding="async" />
+      <FounderPhoto alt={d.founder.photoAlt} />
     </figure>
     <div class="founder__body">
       <p class="eyebrow">{d.founder.label}</p>

@@ -8,3 +8,6 @@ dist/
 
 # OS
 .DS_Store
+
+# local design previews (never published)
+public/_preview*

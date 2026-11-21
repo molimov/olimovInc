@@ -1,0 +1,58 @@
+---
+/* Founder portrait with a woven edge.
+   Top and bottom edges step in tied bundles that rise and fall in a regular
+   chevron — the outline of an ikat motif — and a single woven rule runs
+   underneath: shu (Japan) on the left, turquoise (Uzbekistan) on the right.
+   The photo keeps its own colours. Computed at build time. */
+import { asset } from '../i18n/content';
+
+interface Props { alt: string }
+const { alt } = Astro.props;
+
+const W = 400;
+const H = 500;
+const T = 6; // thread width
+const B = 3; // threads per bundle
+const P = 72; // chevron period
+const A = 14; // chevron depth
+
+let s = 29;
+const rnd = () => {
+  s = (s * 9301 + 49297) % 233280;
+  return s / 233280;
+};
+const edge = (phase: number) => {
+  const out: number[] = [];
+  for (let x = 0; x < W; x += T) {
+    const b = Math.floor(x / (T * B)) * T * B;
+    const tri = Math.abs((((b + phase) / P) % 1) * 2 - 1);
+    out.push(tri * A + rnd() * 1.2);
+  }
+  return out;
+};
+const tops = edge(0).map((v) => 4 + v);
+const bots = edge(P / 2).map((v) => H - 4 - v);
+
+let d = `M0 ${tops[0].toFixed(1)}`;
+tops.forEach((y, i) => (d += ` L${i * T} ${y.toFixed(1)} L${i * T + T} ${y.toFixed(1)}`));
+for (let i = bots.length - 1; i >= 0; i--) d += ` L${i * T + T} ${bots[i].toFixed(1)} L${i * T} ${bots[i].toFixed(1)}`;
+d += ' Z';
+
+const rule: { x: number; y: number; h: number; c: string }[] = [];
+for (let x = 0; x < W; x += 3) {
+  rule.push({ x, y: 514 + (rnd() - 0.5) * 2, h: 5 + (rnd() - 0.5) * 1.5, c: x < W / 2 ? 'jp' : 'uz' });
+}
+---
+<svg class="portrait" viewBox="0 0 400 530" role="img" aria-label={alt}>
+  <defs>
+    <mask id="portrait-edge" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="500">
+      <path d={d} fill="#fff" />
+    </mask>
+  </defs>
+  <g mask="url(#portrait-edge)">
+    <image href={asset('founder.webp')} x="-86" y="-6" width="572" height="563" preserveAspectRatio="xMidYMin slice" />
+  </g>
+  {rule.map((r) => (
+    <rect x={r.x} y={r.y.toFixed(1)} width="2.3" height={r.h.toFixed(1)} class={`rule-${r.c}`} />
+  ))}
+</svg>

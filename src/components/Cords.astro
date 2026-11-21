@@ -1,0 +1,168 @@
+---
+/* Mouse stalker: two cords — shu (Japan) and turquoise (Uzbekistan) —
+   twisted around each other like a plied thread, laid exactly along the
+   path the pointer travelled. Each cord is a soft cotton thread with a
+   little fuzz. The twist is fixed to the path, and the oldest end frays:
+   each cord splits into its fibres, which splay like a brush tip and fade.
+
+   The path is kept in page coordinates, so it stays on the content while
+   scrolling, and scrolling itself extends it (the cursor travels through
+   the page).
+
+   Only for a fine pointer (mouse / trackpad) and only when the visitor
+   has not asked for reduced motion. The native cursor is kept. */
+---
+<canvas class="cords" aria-hidden="true"></canvas>
+
+<script is:inline>
+(function () {
+  if (!matchMedia('(pointer: fine)').matches) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var cv = document.querySelector('canvas.cords');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var css = getComputedStyle(document.documentElement);
+  var JP = css.getPropertyValue('--jp').trim() || '#B4381E';
+  var UZ = css.getPropertyValue('--seiyu').trim() || '#2E7D86';
+  // base, light and dark shade of each cord, for the fibres
+  var COL = { jp: [JP, '#D7714F', '#7E2614'], uz: [UZ, '#5EA8AF', '#1C565D'] };
+
+  var cfg = { life: 350, fray: 0.4 }; // ms a point stays; share of that time spent fraying
+  var STEP = 3;        // resample spacing along the path, px
+  var AMP = 5.5;       // half the twist width, px
+  var TWIST = 46;      // px of path per full twist
+  var MAX_PTS = 900;
+  var dpr = 1, w = 0, h = 0;
+  var pts = [];        // oldest first, page coordinates: { x, y, s (distance along path), t (ms) }
+  var last = null;     // last raw sample (page coordinates)
+  var client = null;   // pointer position in the viewport
+  var dist = 0;
+  var running = false;
+
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    w = innerWidth; h = innerHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  // add one raw sample, resampled every STEP px so the cords follow every bend
+  function add(x, y, t, jump) {
+    if (!last || Math.hypot(x - last.x, y - last.y) > jump) {
+      pts = []; last = { x: x, y: y, r: 0 };
+      pts.push({ x: x, y: y, s: dist, t: t });
+      return;
+    }
+    var dx = x - last.x, dy = y - last.y, d = Math.hypot(dx, dy);
+    if (d < 0.5) return;
+    var r = last.r;
+    for (var k = STEP - r; k <= d; k += STEP) {
+      dist += STEP;
+      pts.push({ x: last.x + dx * k / d, y: last.y + dy * k / d, s: dist, t: t });
+    }
+    last = { x: x, y: y, r: (r + d) % STEP };
+    if (pts.length > MAX_PTS) pts.splice(0, pts.length - MAX_PTS);
+  }
+  function start() { if (!running) { running = true; requestAnimationFrame(frame); } }
+
+  addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
+    var now = performance.now(), sx = scrollX, sy = scrollY;
+    var list = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+    if (!list || !list.length) list = [e];
+    list.forEach(function (c) { add(c.clientX + sx, c.clientY + sy, now, 160); });
+    client = { x: e.clientX, y: e.clientY };
+    start();
+  }, { passive: true });
+
+  // scrolling moves the cursor through the page: extend the path with it
+  addEventListener('scroll', function () {
+    if (!client) return;
+    add(client.x + scrollX, client.y + scrollY, performance.now(), 1200);
+    start();
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', function () { last = null; client = null; });
+
+  function frame(now) {
+    var cut = 0;
+    while (cut < pts.length && now - pts[cut].t > cfg.life) cut++;
+    if (cut) pts.splice(0, cut);
+    draw(now);
+    if (pts.length > 1) requestAnimationFrame(frame);
+    else { running = false; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); }
+  }
+
+  function hash(x) { var s = Math.sin(x * 12.9898) * 43758.5453; return s - Math.floor(s); }
+
+  function draw(now) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    var n = pts.length;
+    if (n < 3) return;
+    ctx.setTransform(dpr, 0, 0, dpr, -scrollX * dpr, -scrollY * dpr);
+    var sHead = pts[n - 1].s, A = [], B = [];
+    for (var i = 0; i < n; i++) {
+      var p = pts[i], q = pts[Math.min(n - 1, i + 2)], o = pts[Math.max(0, i - 2)];
+      var tx = q.x - o.x, ty = q.y - o.y, tl = Math.hypot(tx, ty) || 1;
+      var nx = -ty / tl, ny = tx / tl;
+      var l = Math.max(0, 1 - (now - p.t) / cfg.life);
+      var u = l < cfg.fray ? 1 - l / cfg.fray : 0; // 0 = still plied, 1 = gone
+      var env = Math.min(1, (sHead - p.s) / 16);
+      var ph = (p.s / TWIST) * Math.PI * 2;
+      var off = AMP * env * (1 + u * 0.5) * Math.sin(ph);
+      var a = 1 - u * u, wd = 1 - u * 0.2, front = Math.cos(ph) >= 0;
+      A.push({ x: p.x + nx * off, y: p.y + ny * off, s: p.s, a: a, w: wd, f: u, front: front });
+      B.push({ x: p.x - nx * off, y: p.y - ny * off, s: p.s, a: a, w: wd, f: u });
+    }
+    ctx.lineCap = 'round';
+    for (var j = 0; j < n - 1; j++) {
+      // back cord first, front cord on top
+      if (A[j].front) { strand(B, j, COL.uz, 1.3); strand(A, j, COL.jp, 0); }
+      else { strand(A, j, COL.jp, 0); strand(B, j, COL.uz, 1.3); }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // one segment of one cord: a cotton thread with fuzz, or splayed fibres while fraying
+  function strand(S, j, col, seed) {
+    var a = S[j], b = S[j + 1];
+    if (a.a <= 0) return;
+    var dx = b.x - a.x, dy = b.y - a.y, dl = Math.hypot(dx, dy) || 1, nx = -dy / dl, ny = dx / dl;
+    var W = 2.9 * a.w;
+    if (a.f > 0.01) return fibres(a, b, nx, ny, W, col, seed);
+    ctx.globalAlpha = a.a;
+    line(a.x, a.y, b.x, b.y, col[0], W * 0.82);
+    var hs = hash(a.s * 0.37 + seed * 91);
+    if (hs < 0.3) {
+      var side = hash(a.s + seed) < 0.5 ? 1 : -1, ang = (hash(a.s * 1.7 + seed) - 0.5) * 1.4;
+      var ex = nx * side, ey = ny * side, c = Math.cos(ang), s = Math.sin(ang);
+      var hx = ex * c - ey * s, hy = ex * s + ey * c, len = 1 + hash(a.s * 3.1 + seed) * 2;
+      var sx = a.x + ex * W * 0.38, sy = a.y + ey * W * 0.38;
+      ctx.globalAlpha = a.a * 0.5;
+      line(sx, sy, sx + hx * len, sy + hy * len, col[hs < 0.15 ? 1 : 0], 0.55);
+    }
+  }
+  function fibres(a, b, nx, ny, W, col, seed) {
+    var order = [];
+    for (var k = 0; k < 3; k++) {
+      var pa = a.s / 5 + k * 2.094 + seed, pb = b.s / 5 + k * 2.094 + seed;
+      order.push({ k: k, pa: pa, pb: pb, d: Math.cos(pa) });
+    }
+    order.sort(function (x, y) { return x.d - y.d; });
+    order.forEach(function (o) {
+      var oa = W * 0.3 * Math.sin(o.pa) + (o.k - 1) * a.f * 6;
+      var ob = W * 0.3 * Math.sin(o.pb) + (o.k - 1) * b.f * 6;
+      ctx.globalAlpha = a.a * (1 - a.f * 0.3);
+      line(a.x + nx * oa, a.y + ny * oa, b.x + nx * ob, b.y + ny * ob,
+        o.d > 0.35 ? col[1] : o.d < -0.35 ? col[2] : col[0], W * 0.46 * (1 - a.f * 0.35));
+    });
+  }
+  function line(x1, y1, x2, y2, c, lw) {
+    ctx.strokeStyle = c; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+})();
+</script>

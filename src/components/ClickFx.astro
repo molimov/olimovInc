@@ -1,0 +1,91 @@
+---
+/* Click / tap effect: a hex bolt head appears and is tightened by 60°,
+   as if by a wrench; when it seats, the washer ripples once and six short
+   torque marks flash. The bolt is shu (Japan), the washer turquoise
+   (Uzbekistan) — the deal is fastened.
+
+   Works for mouse, pen and touch. Skipped when the visitor has asked for
+   reduced motion. */
+---
+<canvas class="clickfx" aria-hidden="true"></canvas>
+
+<script is:inline>
+(function () {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var cv = document.querySelector('canvas.clickfx');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var css = getComputedStyle(document.documentElement);
+  var JP = css.getPropertyValue('--jp').trim() || '#B4381E';
+  var UZ = css.getPropertyValue('--seiyu').trim() || '#2E7D86';
+  var INK = '#1F2F4A', BG = '#EEF0EC';
+  var DUR = 750;
+  var fx = [], running = false, dpr = 1, w = 0, h = 0;
+
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    w = innerWidth; h = innerHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  addEventListener('pointerdown', function (e) {
+    if (e.button > 0) return; // primary button / touch only
+    fx.push({ x: e.clientX, y: e.clientY, t: performance.now(), k: e.pointerType === 'touch' ? 1.35 : 1 });
+    if (!running) { running = true; requestAnimationFrame(frame); }
+  }, { passive: true });
+
+  function clamp(v) { return Math.max(0, Math.min(1, v)); }
+  function seg(t, a, b) { return clamp((t - a) / (b - a)); }
+  function out3(t) { return 1 - Math.pow(1 - t, 3); }
+  function inOut(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+  function frame(now) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    fx = fx.filter(function (f) { return now - f.t < DUR; });
+    fx.forEach(function (f) {
+      ctx.setTransform(dpr * f.k, 0, 0, dpr * f.k, f.x * dpr, f.y * dpr);
+      bolt((now - f.t) / DUR);
+    });
+    ctx.globalAlpha = 1;
+    if (fx.length) requestAnimationFrame(frame);
+    else { running = false; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); }
+  }
+
+  function bolt(t) {
+    var a = Math.min(seg(t, 0, 0.12), 1 - seg(t, 0.72, 1));
+    var s = out3(seg(t, 0, 0.2));
+    var turn = inOut(seg(t, 0.15, 0.6)) * Math.PI / 3;
+    var hit = seg(t, 0.58, 0.9);
+    // washer, which ripples outwards once the bolt seats
+    ctx.strokeStyle = UZ; ctx.lineWidth = 1.6;
+    ctx.globalAlpha = a * (1 - hit * 0.9);
+    ctx.beginPath(); ctx.arc(0, 0, 13 * s + out3(hit) * 7, 0, Math.PI * 2); ctx.stroke();
+    // hex head
+    ctx.globalAlpha = a;
+    ctx.save(); ctx.rotate(turn); ctx.scale(s, s);
+    ctx.beginPath();
+    for (var i = 0; i < 6; i++) {
+      var g = i / 6 * Math.PI * 2 + Math.PI / 6;
+      ctx.lineTo(Math.cos(g) * 9.5, Math.sin(g) * 9.5);
+    }
+    ctx.closePath(); ctx.fillStyle = JP; ctx.fill();
+    ctx.strokeStyle = BG; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(0, 0, 5.2, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    // six torque marks flash as it seats
+    if (hit > 0 && hit < 1) {
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.2; ctx.globalAlpha = a * (1 - hit);
+      for (var k = 0; k < 6; k++) {
+        var g2 = k / 6 * Math.PI * 2, r0 = 15 + hit * 4, r1 = r0 + 4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(g2) * r0, Math.sin(g2) * r0);
+        ctx.lineTo(Math.cos(g2) * r1, Math.sin(g2) * r1);
+        ctx.stroke();
+      }
+    }
+  }
+})();
+</script>

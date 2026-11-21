@@ -173,7 +173,13 @@ const dirTone = ['uz', 'jp'];
       <p class="eyebrow">{d.contact.label}</p>
       <h2 id="contact-title">{d.contact.title}</h2>
       <p class="contact__lead">{d.contact.lead}</p>
-      <a class="contact__mail" href={mail}>{company.email}</a>
+      <div class="contact__addr">
+        <a class="contact__mail" href={mail}>{company.email}</a>
+        <button type="button" class="copy" data-copy={company.email} data-done={d.contact.copied} hidden>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M3.5 10.5h-1v-8h8v1"/></svg>
+          <span>{d.contact.copy}</span>
+        </button>
+      </div>
       <p class="note">{d.contact.reply}</p>
     </div>
     <div class="clocks" aria-label={d.contact.clocksLabel}>
@@ -202,5 +208,21 @@ const dirTone = ['uz', 'jp'];
     }
     tick();
     setInterval(tick, 30000);
+  })();
+
+  // Copy the email address, for visitors without a mail app set up.
+  (function () {
+    if (!navigator.clipboard) return; // keep the button hidden where copying is unavailable
+    document.querySelectorAll('.copy').forEach(function (b) {
+      var label = b.querySelector('span'), idle = label.textContent, timer;
+      b.hidden = false;
+      b.addEventListener('click', function () {
+        navigator.clipboard.writeText(b.dataset.copy).then(function () {
+          label.textContent = b.dataset.done; b.classList.add('is-done');
+          clearTimeout(timer);
+          timer = setTimeout(function () { label.textContent = idle; b.classList.remove('is-done'); }, 2200);
+        });
+      });
+    });
   })();
 </script>

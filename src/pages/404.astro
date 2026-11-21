@@ -1,0 +1,39 @@
+---
+/* Shown by GitHub Pages for any address that does not exist. The visitor's
+   language is unknown, so the message is given in all four languages,
+   each with a link to its own home page. */
+import Base from '../layouts/Base.astro';
+import { t, href, LANGS } from '../i18n/content';
+const ja = t('ja');
+---
+<Base lang="ja" bare title={`${ja.notFound.title} — ${ja.companyName}`}>
+  <section class="lost">
+    <div class="wrap">
+      <p class="lost__code mono" aria-hidden="true">404</p>
+      <ul class="lost__list">
+        {LANGS.map((l) => {
+          const n = t(l).notFound;
+          return (
+            <li lang={l}>
+              <h1 class="lost__title">{n.title}</h1>
+              <p class="lost__lead">{n.lead}</p>
+              <a class="lost__back" href={href(l)}>{n.back}</a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lost { padding: clamp(56px, 10vw, 120px) 0 clamp(64px, 10vw, 128px); }
+  .lost__code { font-size: clamp(3.5rem, 12vw, 7rem); line-height: 1; letter-spacing: 0.04em; color: var(--fg); margin: 0 0 clamp(28px, 5vw, 48px); }
+  .lost__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(32px, 5vw, 72px); }
+  .lost__list li { padding: 1.4rem 0 1.6rem; border-top: 1px solid var(--line-strong); }
+  .lost__list li:first-child .lost__title { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+  .lost__title { font-family: var(--f-head); font-size: 1.15rem; font-weight: 500; margin: 0 0 0.4rem; }
+  .lost__lead { color: var(--fg-2); margin: 0 0 0.9rem; font-size: 0.95rem; }
+  .lost__back { color: var(--fg); text-underline-offset: 0.22em; }
+  @media (max-width: 640px) { .lost__list { grid-template-columns: 1fr; } }
+</style>

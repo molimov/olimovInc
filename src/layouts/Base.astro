@@ -1,31 +1,78 @@
 ---
 import '../styles/global.css';
-import { t, href, asset, LANGS, LANG_SHORT, LANG_NAMES, type Lang } from '../i18n/content';
+import { t, href, asset, company, LANGS, LANG_SHORT, LANG_NAMES, type Lang } from '../i18n/content';
 import Ikat from '../components/Ikat.astro';
 import Cords from '../components/Cords.astro';
+import ClickFx from '../components/ClickFx.astro';
 
-interface Props { lang: Lang }
-const { lang } = Astro.props;
+/* bare: a page without the home sections (the 404 page) — no section
+   navigation, not indexed. */
+interface Props { lang: Lang; bare?: boolean; title?: string }
+const { lang, bare = false, title } = Astro.props;
 const d = t(lang);
 const site = Astro.site ?? new URL('https://olimov.example');
 const navKeys = ['directions', 'services', 'process', 'work', 'founder', 'company'] as const;
+const pageUrl = new URL(href(lang), site).href;
+const ogImage = new URL(asset(`og/${lang}.png`), site).href;
+const OG_LOCALE: Record<Lang, string> = { ja: 'ja_JP', en: 'en_US', ru: 'ru_RU', uz: 'uz_UZ' };
+
+/* Organisation facts for search engines (schema.org). Facts only, from
+   company-brief.md: no prices, no client names, no officers besides the founder. */
+const orgData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: d.companyName,
+  alternateName: ['OLIMOV株式会社', 'OLIMOV CO., LTD.'],
+  url: new URL(href('ja'), site).href,
+  logo: new URL(asset('apple-touch-icon.png'), site).href,
+  image: ogImage,
+  description: d.meta.description,
+  email: company.email,
+  foundingDate: '2025-12-01',
+  address: {
+    '@type': 'PostalAddress',
+    postalCode: '106-0032',
+    addressRegion: '東京都',
+    addressLocality: '港区',
+    streetAddress: '六本木3-16-12 六本木KSビル5F',
+    addressCountry: 'JP',
+  },
+  founder: { '@type': 'Person', name: 'Olimov Mukhammadolim', alternateName: 'オリモブ ムハマドオリム' },
+  areaServed: [{ '@type': 'Country', name: 'Japan' }, { '@type': 'Country', name: 'Uzbekistan' }],
+  knowsLanguage: ['ja', 'uz', 'ru', 'en'],
+};
 ---
 <!doctype html>
 <html lang={lang}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{d.meta.title}</title>
+  <title>{title ?? d.meta.title}</title>
   <meta name="description" content={d.meta.description} />
   <meta name="theme-color" content="#EEF0EC" />
   <meta name="color-scheme" content="light" />
   <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
-  <link rel="canonical" href={new URL(href(lang), site).href} />
+  <link rel="apple-touch-icon" href={asset('apple-touch-icon.png')} />
+  {bare ? <meta name="robots" content="noindex" /> : (
+    <Fragment>
+  <link rel="canonical" href={pageUrl} />
   {LANGS.map((l) => <link rel="alternate" hreflang={l} href={new URL(href(l), site).href} />)}
   <link rel="alternate" hreflang="x-default" href={new URL(href('ja'), site).href} />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={d.companyName} />
   <meta property="og:title" content={d.meta.title} />
   <meta property="og:description" content={d.meta.description} />
+  <meta property="og:url" content={pageUrl} />
+  <meta property="og:locale" content={OG_LOCALE[lang]} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={d.footer.tagline} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="sitemap" href={asset('sitemap.xml')} />
+  <script type="application/ld+json" set:html={JSON.stringify(orgData)} />
+    </Fragment>
+  )}
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -43,9 +90,11 @@ const navKeys = ['directions', 'services', 'process', 'work', 'founder', 'compan
         <span class="logo__script" aria-hidden="true">Olimov</span>
       </a>
 
-      <nav class="nav" aria-label={d.menu}>
-        {navKeys.map((k) => <a href={`#${k}`}>{d.nav[k]}</a>)}
-      </nav>
+      {!bare && (
+        <nav class="nav" aria-label={d.menu}>
+          {navKeys.map((k) => <a href={`#${k}`}>{d.nav[k]}</a>)}
+        </nav>
+      )}
 
       <div class="bar__end">
         <ul class="langs" aria-label="Language">
@@ -57,13 +106,13 @@ const navKeys = ['directions', 'services', 'process', 'work', 'founder', 'compan
             </li>
           ))}
         </ul>
-        <a class="btn btn--small" href="#contact">{d.navCta}</a>
-        <details class="menu">
+        <a class="btn btn--small" href={bare ? `${href(lang)}#contact` : '#contact'}>{d.navCta}</a>
+        {!bare && <details class="menu">
           <summary>{d.menu}</summary>
           <nav aria-label={d.menu}>
             {navKeys.map((k) => <a href={`#${k}`}>{d.nav[k]}</a>)}
           </nav>
-        </details>
+        </details>}
       </div>
     </div>
   </header>
@@ -85,6 +134,7 @@ const navKeys = ['directions', 'services', 'process', 'work', 'founder', 'compan
   </footer>
 
   <Cords />
+  <ClickFx />
 
   <script is:inline>
     // Close the mobile menu after choosing a section.

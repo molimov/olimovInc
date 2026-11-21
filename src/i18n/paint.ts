@@ -11,6 +11,7 @@ const RULES: Record<Lang, RegExp> = {
   // group 1 = Japan, group 2 = Uzbekistan / Central Asia
   ja: /(日本|東京|TOKYO)|(ウズベキスタン|タシケント|中央アジア|TASHKENT)/g,
   en: /\b(Japan(?:ese)?|Tokyo|TOKYO)\b|\b(Uzbekistan|Uzbek|Tashkent|TASHKENT|Central Asia(?:n)?)\b/g,
+  uz: /(Yapon\p{L}*|yapon\p{L}*|Tokio|TOKYO)|(O‘zbekiston\p{L}*|[Oo]‘zbek\p{L}*|Toshkent\p{L}*|Markaziy\s+Osiyo\p{L}*|TASHKENT)/gu,
   ru: /(Япони\p{L}*|[Яя]понск\p{L}*|Токио|TOKYO)|(Узбекистан\p{L}*|[Уу]збекск\p{L}*|Ташкент\p{L}*|Центральн\p{L}*\s+Ази\p{L}*|TASHKENT)/gu,
 };
 

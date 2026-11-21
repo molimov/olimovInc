@@ -1,7 +1,7 @@
-export type Lang = 'ja' | 'en' | 'ru';
-export const LANGS: Lang[] = ['ja', 'en', 'ru'];
-export const LANG_SHORT: Record<Lang, string> = { ja: 'JA', en: 'EN', ru: 'RU' };
-export const LANG_NAMES: Record<Lang, string> = { ja: '日本語', en: 'English', ru: 'Русский' };
+export type Lang = 'ja' | 'en' | 'ru' | 'uz';
+export const LANGS: Lang[] = ['ja', 'en', 'ru', 'uz'];
+export const LANG_SHORT: Record<Lang, string> = { ja: 'JA', en: 'EN', ru: 'RU', uz: 'UZ' };
+export const LANG_NAMES: Record<Lang, string> = { ja: '日本語', en: 'English', ru: 'Русский', uz: 'O‘zbekcha' };
 
 const BASE = import.meta.env.BASE_URL.endsWith('/')
   ? import.meta.env.BASE_URL
@@ -17,7 +17,7 @@ export const asset = (path: string): string => BASE + path.replace(/^\//, '');
    ------------------------------------------------------------------ */
 export const company = {
   email: 'Olimov.jp@outlook.com',
-  founded: { ja: '2025年12月1日', en: '1 December 2025', ru: '1 декабря 2025 г.' },
+  founded: { ja: '2025年12月1日', en: '1 December 2025', ru: '1 декабря 2025 г.', uz: '2025-yil 1-dekabr' },
 };
 
 const coords = {
@@ -212,6 +212,7 @@ export const content = {
         { city: 'タシケント', tz: 'Asia/Tashkent', utc: 'UTC+5' },
       ],
       clockNote: '両都市の時差は4時間です。',
+      copy: 'アドレスをコピー', copied: 'コピーしました',
     },
 
     footer: {
@@ -219,6 +220,8 @@ export const content = {
       rights: '© 2026 OLIMOV株式会社',
       top: 'ページの先頭へ',
     },
+
+    notFound: { title: 'ページが見つかりません', lead: 'お探しのページは移動したか、削除された可能性があります。', back: 'トップページへ戻る' },
   },
 
   en: {
@@ -395,6 +398,7 @@ export const content = {
         { city: 'Tashkent', tz: 'Asia/Tashkent', utc: 'UTC+5' },
       ],
       clockNote: 'The two cities are four hours apart.',
+      copy: 'Copy address', copied: 'Copied',
     },
 
     footer: {
@@ -402,6 +406,8 @@ export const content = {
       rights: '© 2026 OLIMOV CO., LTD.',
       top: 'Back to top',
     },
+
+    notFound: { title: 'Page not found', lead: 'The page you are looking for may have moved or been removed.', back: 'Back to the home page' },
   },
 
   ru: {
@@ -578,6 +584,7 @@ export const content = {
         { city: 'Ташкент', tz: 'Asia/Tashkent', utc: 'UTC+5' },
       ],
       clockNote: 'Разница во времени — четыре часа.',
+      copy: 'Скопировать адрес', copied: 'Скопировано',
     },
 
     footer: {
@@ -585,6 +592,196 @@ export const content = {
       rights: '© 2026 OLIMOV CO., LTD.',
       top: 'Наверх',
     },
+
+    notFound: { title: 'Страница не найдена', lead: 'Возможно, страница была перемещена или удалена.', back: 'На главную' },
+  },
+
+  /* Uzbek, Latin script (the official alphabet). o‘ / g‘ are written with
+     ‘ (U+2018) and the tutuq belgisi with ’ (U+2019): IBM Plex draws the
+     dedicated U+02BB / U+02BC as wide as a letter, which breaks words apart. */
+  uz: {
+    meta: {
+      title: 'OLIMOV CO., LTD. — Yaponiya va O‘zbekiston o‘rtasidagi savdo',
+      description:
+        'O‘zbekistonga eksport, O‘zbekistondan import va mahalliy kompaniyalar bilan hamkorlik. Yapon, o‘zbek, rus va ingliz tillarida so‘zlashuvchi rahbar bitimni shartnomadan yetkazib berishgacha olib boradi. Tokio, Minato.',
+    },
+    skip: 'Asosiy mazmunga o‘tish',
+    companyName: 'OLIMOV CO., LTD.',
+    nav: { directions: 'Murojaatlar', services: 'Xizmatlar', process: 'Ish tartibi', work: 'Tajriba', founder: 'Rahbar so‘zi', company: 'Kompaniya haqida' },
+    menu: 'Menyu',
+    navCta: 'Bog‘lanish',
+
+    hero: {
+      eyebrow: 'OLIMOV CO., LTD. — Tokio · Toshkent',
+      title: ['Yapon kompaniyalariga — O‘zbekiston bozori.', 'O‘zbek kompaniyalariga — Yaponiyadagi vakil.'],
+      lead:
+        'O‘zbekistonga eksport, O‘zbekistondan import va mahalliy kompaniyalar bilan hamkorlik. Bunday bitimlar ko‘pincha til va ish yuritish odatlaridagi farqlar tufayli to‘xtab qoladi. Rahbarimiz yapon, o‘zbek, rus va ingliz tillarida so‘zlashadi hamda bitimingizni birinchi xatdan yetkazib berishgacha shaxsan olib boradi.',
+      cta: 'Bizga yozing',
+      ctaNote: '3 ish kuni ichida javob beramiz',
+      ends: [
+        { city: 'Tokio', coord: coords.tokyo },
+        { city: 'Toshkent', coord: coords.tashkent },
+      ],
+    },
+
+    directions: {
+      label: JA_EYEBROWS.directions,
+      title: 'Ikki mamlakat kompaniyalaridan murojaatlarni qabul qilamiz',
+      items: [
+        {
+          route: 'TOKYO → TASHKENT',
+          for: 'Yaponiyadagi kompaniyalar uchun',
+          head: 'O‘zbekistonda sotish va xarid qilish',
+          points: [
+            'Savdoni oshirish uchun yangi mijozlar va bozorlar izlayapsiz hamda O‘zbekiston yoki Markaziy Osiyoni ko‘rib chiqyapsiz',
+            'O‘zbekistondan xomashyo yoki mahsulot import qilmoqchisiz',
+            'Qaror qabul qilishdan oldin hamkorni joyida va uning o‘z tilida tekshirmoqchisiz',
+          ],
+        },
+        {
+          route: 'TASHKENT → TOKYO',
+          for: 'O‘zbekiston va Markaziy Osiyo kompaniyalari uchun',
+          head: 'Yaponiyadan xarid qilish va Yaponiyada sotish',
+          points: [
+            'Sizga yapon uskunalari va butlovchi qismlari, jumladan ehtiyot qismlar kerak',
+            'O‘z mahsulotingiz yoki xomashyongizni yapon kompaniyalariga taqdim etmoqchisiz',
+            'Yapon tomoni bilan shartnoma va yozishmalarni bitta ijrochiga topshirmoqchisiz',
+          ],
+        },
+      ],
+      note: 'Asosiy bozorimiz — O‘zbekiston; Markaziy Osiyoning boshqa mamlakatlari bilan savdo bo‘yicha ham murojaatlarni qabul qilamiz.',
+    },
+
+    services: {
+      label: JA_EYEBROWS.services,
+      title: 'Xizmatlar',
+      items: [
+        {
+          name: 'Eksport va import',
+          desc: 'Yetkazib berish shartlari, eksport hujjatlari va kelib chiqish sertifikatlari, havo va dengiz orqali tashish. Yuk Toshkent aeroportida topshirilgunga qadar uning uchun javobgarlikni o‘z zimmamizga olamiz.',
+          terms: ['Incoterms 2020', 'CIP', 'Kelib chiqish sertifikati'],
+        },
+        {
+          name: 'Shartnomalar va og‘zaki tarjima',
+          desc: 'O‘zbekistondagi kontragentlar bilan oldi-sotdi shartnomalarini tuzamiz hamda yetkazib berish shartlari, to‘lov va kafolatni bitimdan oldin yozma ravishda kelishib olamiz. Muzokaralarda tarjimon sifatida ishtirok etamiz.',
+          terms: ['Oldi-sotdi shartnomasi', 'Ketma-ket tarjima', 'T/T · L/C'],
+        },
+        {
+          name: 'Bozor tadqiqoti va hamkor tanlash',
+          desc: 'Mahalliy kompaniyalarni o‘rganib, yapon va ingliz tillarida hisobot tayyorlaymiz, zarur bo‘lsa joyiga borib. Nomzodlarni saralashdan tortib uchrashuvlarni tashkil etish va bayonnoma yuritishgacha.',
+          terms: ['Kompaniyalarni tekshirish', 'Hisobot JA · EN', 'Uchrashuvlar'],
+        },
+        {
+          name: 'IT ishlanmalarda vositachilik',
+          desc: 'Tizim yoki xizmatni joriy etish yoxud yaratishni rejalashtirgan o‘zbek kompaniyalarini Yaponiyadagi muhandislar va dasturchilar bilan bog‘laymiz hamda talablarni aniqlashdan loyihani yuritishgacha tomonlar o‘rtasidagi ishni muvofiqlashtiramiz.',
+          terms: ['Dasturchilarni tanishtirish', 'Talablar', 'Loyihani muvofiqlashtirish'],
+        },
+      ],
+    },
+
+    process: {
+      label: JA_EYEBROWS.process,
+      title: 'Ish tartibi',
+      steps: [
+        { name: 'Murojaat', desc: 'Hozircha ma’lum bo‘lgan ma’lumotlarni yuboring: tovarlar va hajmlar yoki tekshirilishi kerak bo‘lgan kompaniya.' },
+        { name: 'Javob', desc: '3 ish kuni ichida ishni qabul qila olishimizni ma’lum qilamiz.' },
+        { name: 'Narx hisob-kitobi', desc: 'Narx har bir loyiha uchun alohida hisoblanadi.' },
+        { name: 'Shartnoma va logistika', desc: 'Shartnomani tuzamiz, tashish va joydagi kelishuvlarni tashkil qilamiz.' },
+        { name: 'Topshirish', desc: 'Yuk joyida qabul qilinguncha kuzatib boramiz.' },
+      ],
+    },
+
+    work: {
+      label: JA_EYEBROWS.work,
+      title: 'Tajriba',
+      lead: 'Mijozlarimiz nomlarini oshkor qilmaymiz.',
+      items: [
+        {
+          kind: 'Eksport',
+          status: 'Yakunlangan · bir nechta bitim',
+          done: true,
+          title: 'Yapon sanoat uskunalarini O‘zbekistonga eksport qilish',
+          desc: 'Mahalliy ishlab chiqaruvchilar uchun yapon nasoslari va boshqa sanoat uskunalari ehtiyot qismlari bilan birga eksport qilindi. Shartnoma, eksport rasmiylashtiruvi va aeroportda topshirishgacha bo‘lgan ishni to‘liq olib bordik.',
+        },
+        {
+          kind: 'Tadqiqot · hamkorlik',
+          status: 'Yakunlangan',
+          done: true,
+          title: 'Yapon va o‘zbek ishlab chiqaruvchilari o‘rtasidagi hamkorlik',
+          desc: 'Bir xil mineral bilan ishlaydigan ikki kompaniya o‘rtasida turib, o‘zbek kompaniyasini o‘rgandik, yapon va ingliz tillarida hisobot tayyorladik, uchrashuvni tashkil etdik va bayonnoma yuritdik.',
+        },
+        {
+          kind: 'IT ishlanmalarda vositachilik',
+          status: 'Jarayonda',
+          done: false,
+          title: 'Mahalliy yetkazib berish xizmati uchun tizim ishlab chiqish',
+          desc: 'Yaponiyadagi muhandislar bilan birgalikda O‘zbekistondagi yetkazib berish xizmati uchun tizim konsepsiyasini shakllantirmoqdamiz.',
+        },
+      ],
+    },
+
+    founder: {
+      label: JA_EYEBROWS.founder,
+      title: 'Rahbar so‘zi',
+      message: [
+        'Yaponiyada O‘zbekistonda talab qilinadigan mahsulot va texnologiyalar ko‘p. Shu bilan birga, yapon uskunalari va butlovchi qismlariga ehtiyoji bor, ammo yapon kompaniyalari bilan aloqasi bo‘lmagan mahalliy kompaniyalar ham oz emas.',
+        'Men Toshkentda tug‘ilganman va bolaligimdan Yaponiyada voyaga yetganman. Ikki mamlakatning tili va ish yuritish odatlarini tushunadigan inson sifatida bu ikki bozorni ishonchli bog‘lash — kompaniyamizning vazifasidir.',
+      ],
+      name: 'Olimov Muhammadolim',
+      nameAlt: '',
+      role: 'Bosh direktor',
+      photoAlt: 'Olimov Muhammadolim, bosh direktor',
+      bioLabel: 'Tarjimai hol',
+      bio: [
+        { year: '2003', text: 'O‘zbekiston, Toshkent shahrida tug‘ilgan' },
+        { year: '2010', text: 'Yaponiyaga ko‘chib kelgan' },
+        { year: '2023', text: 'Houterasu — Yaponiya huquqiy yordam markazining ro‘yxatdan o‘tgan tarjimoni (yapon, o‘zbek, rus, ingliz tillari)' },
+        { year: '2025', text: 'WBS Business Plan Contest 2025 — hakamlar hay’atining maxsus mukofoti' },
+        { year: '2025', text: 'TMU Business Idea Contest 2025 — MTG-Ventures mukofoti' },
+        { year: '2025', text: 'OLIMOV CO., LTD. kompaniyasiga asos solib, bosh direktor bo‘lgan' },
+        { year: '2026', text: 'Tokio metropoliten universiteti, Tizimli dizayn fakulteti, Informatika kafedrasini tamomlagan' },
+        { year: '2026', text: 'Institute of Science Tokyo, Atrof-muhit va jamiyat maktabi, «Texnologiyalar va innovatsiyalarni boshqarish» professional magistratura dasturi talabasi' },
+      ],
+      langsLabel: 'Tillar',
+      langs: ['Yapon', 'O‘zbek', 'Rus', 'Ingliz'],
+    },
+
+    company: {
+      label: JA_EYEBROWS.company,
+      title: 'Kompaniya haqida',
+      rows: [
+        { k: 'Nomi', v: 'OLIMOV CO., LTD.' },
+        { k: 'Tashkil etilgan sana', v: company.founded.uz },
+        { k: 'Ustav kapitali', v: '1 000 000 iyena' },
+        { k: 'Rahbar', v: 'Olimov Muhammadolim, bosh direktor' },
+        { k: 'Manzil', v: 'Yaponiya, Tokio, Minato-ku, Roppongi 3-16-12, Roppongi KS Bldg. 5F, 106-0032' },
+        { k: 'Faoliyat', v: 'Eksport va import / Shartnomalar va og‘zaki tarjima / Bozor tadqiqoti va hamkor tanlash / IT ishlanmalarda vositachilik' },
+        { k: 'Tillar', v: 'Yapon, o‘zbek, rus, ingliz' },
+        { k: 'Aloqa', v: company.email, mail: true },
+      ],
+    },
+
+    contact: {
+      label: JA_EYEBROWS.contact,
+      title: 'Aloqa',
+      lead: 'Murojaatlarni elektron pochta orqali qabul qilamiz. Hozircha ma’lum bo‘lgan ma’lumotlarni yuboring: tovarlar va hajmlar yoki tekshirilishi kerak bo‘lgan kompaniya. Agar vazifani bajara olmasak, sabablarini ko‘rsatgan holda javob beramiz.',
+      reply: '3 ish kuni ichida javob beramiz',
+      clocksLabel: 'Mahalliy vaqt',
+      clocks: [
+        { city: 'Tokio', tz: 'Asia/Tokyo', utc: 'UTC+9' },
+        { city: 'Toshkent', tz: 'Asia/Tashkent', utc: 'UTC+5' },
+      ],
+      clockNote: 'Ikki shahar o‘rtasidagi vaqt farqi — to‘rt soat.',
+      copy: 'Manzilni nusxalash', copied: 'Nusxalandi',
+    },
+
+    footer: {
+      tagline: 'Yaponiya va O‘zbekiston o‘rtasidagi ko‘prik',
+      rights: '© 2026 OLIMOV CO., LTD.',
+      top: 'Yuqoriga',
+    },
+
+    notFound: { title: 'Sahifa topilmadi', lead: 'Siz izlayotgan sahifa ko‘chirilgan yoki o‘chirilgan bo‘lishi mumkin.', back: 'Bosh sahifaga qaytish' },
   },
 } as const;
 
